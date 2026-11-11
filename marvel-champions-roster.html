@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marvel Champions Roster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: one header band with filter controls, then one full-width sortable table that scrolls sideways on phones. */
+:root {
+  --bg: #f5f6f9; --surface: #ffffff; --fg: #1a1d26; --muted: #5d6475; --line: #dde0e8; --hover: #eef0f5;
+  --accent: #2f4fd8;
+  --agg: #c8323c; --jus: #b08a00; --lea: #2a63c9; --pro: #2e8b48; --pool: #d0459a; --multi: #6b5bb8;
+  --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12141b; --surface: #1a1d26; --fg: #e8eaf0; --muted: #9aa1b3; --line: #2c3040; --hover: #22263280;
+  --accent: #7d95ff;
+  --agg: #ff6b73; --jus: #f2c94c; --lea: #6ea2ff; --pro: #5ccb7c; --pool: #ff7cc6; --multi: #a99cf0;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12141b; --surface: #1a1d26; --fg: #e8eaf0; --muted: #9aa1b3; --line: #2c3040; --hover: #22263280;
+  --accent: #7d95ff;
+  --agg: #ff6b73; --jus: #f2c94c; --lea: #6ea2ff; --pro: #5ccb7c; --pool: #ff7cc6; --multi: #a99cf0;
+  color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 14px; line-height: 1.45; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 18px; }
+h1 { font-family: var(--display); font-weight: 800; font-size: 2.4rem; line-height: 1; margin: 0; letter-spacing: .01em; text-transform: uppercase; text-wrap: balance; }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 70ch; }
+
+.controls { display: flex; flex-direction: column; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); min-width: 72px; }
+input[type="search"] { flex: 1 1 220px; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--fg); }
+input[type="search"]:focus-visible, button:focus-visible, th:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.chip { font: inherit; font-size: 12.5px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--fg); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.chip .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c, var(--muted)); }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.chip .n { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 11px; }
+.chip[aria-pressed="true"] .n { color: inherit; opacity: .7; }
+.traits { max-height: none; }
+.meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: 13px; }
+.meta button { font: inherit; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; }
+
+.tablebox { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; min-width: 860px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); cursor: pointer; user-select: none; white-space: nowrap; position: sticky; top: 0; background: var(--surface); }
+th[aria-sort="ascending"]::after { content: " ▲"; font-size: 10px; color: var(--accent); }
+th[aria-sort="descending"]::after { content: " ▼"; font-size: 10px; color: var(--accent); }
+th[aria-sort] { color: var(--fg); }
+tbody tr:hover { background: var(--hover); }
+tbody tr:last-child td { border-bottom: 0; }
+td.hero { font-weight: 600; white-space: nowrap; border-left: 4px solid var(--c); }
+td.hero small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+.asp { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--c); white-space: nowrap; }
+.asp .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+.tag { display: inline-block; font-size: 12px; padding: 1px 7px; margin: 1px 3px 1px 0; border-radius: 4px; background: var(--hover); border: 1px solid var(--line); cursor: pointer; color: var(--fg); font-family: inherit; }
+.tag.on { border-color: var(--accent); color: var(--accent); }
+.tu { display: block; }
+.tu + .tu { margin-top: 3px; }
+.tu b { font-weight: 600; }
+.tu i { color: var(--muted); font-style: normal; font-size: 12.5px; }
+.none { color: var(--muted); }
+td.num { font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+.empty { padding: 28px; text-align: center; color: var(--muted); }
+footer { color: var(--muted); font-size: 12.5px; }
+footer a { color: var(--accent); }
+@media (max-width: 600px) { h1 { font-size: 1.9rem; } .label { min-width: 100%; } }
+</style>
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Marvel Champions Roster</h1>
+    <p class="sub">Every playable hero with the aspect their starter deck came in, their traits, and the team-up cards that pair them with other heroes. Click a column to sort it, or a trait to filter by it.</p>
+  </header>
+
+  <section class="controls" aria-label="Filters">
+    <div class="row">
+      <span class="label">Search</span>
+      <input type="search" id="q" placeholder="Hero, alter-ego trait, team-up card…" autocomplete="off">
+    </div>
+    <div class="row" id="aspects"><span class="label">Aspect</span></div>
+    <div class="row traits" id="traits"><span class="label">Hero trait</span></div>
+    <div class="row">
+      <span class="label">Team-up</span>
+      <button class="chip" id="tuOnly" aria-pressed="false">Has a team-up card</button>
+    </div>
+  </section>
+
+  <div class="meta"><span id="count"></span><button id="reset" type="button">Clear filters</button></div>
+
+  <div class="tablebox">
+    <table>
+      <thead><tr>
+        <th data-k="name" tabindex="0">Hero</th>
+        <th data-k="aspect" tabindex="0">Aspect</th>
+        <th data-k="ht" tabindex="0">Hero traits</th>
+        <th data-k="at" tabindex="0">Alter-ego traits</th>
+        <th data-k="tu" tabindex="0">Teams up with</th>
+        <th data-k="rel" tabindex="0">Pack</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="empty" hidden>No heroes match these filters.</div>
+  </div>
+
+  <footer>Data from <a href="https://marvelcdb.com/" target="_blank" rel="noopener">MarvelCDB</a> and <a href="https://hallofheroeslcg.com/" target="_blank" rel="noopener">Hall of Heroes</a>, November 2026. Elektra and Iron Fist were filled in by hand because MarvelCDB doesn't have their packs yet. A team-up card is only in the pack shown next to it.</footer>
+</div>
+
+<script>
+const ASPECTS = {
+  Aggression: "--agg", Justice: "--jus", Leadership: "--lea", Protection: "--pro", "'Pool": "--pool", "All four": "--multi"
+};
+const ORDER = ["Aggression", "Justice", "Leadership", "Protection", "'Pool", "All four"];
+// [hero, alter ego/note, aspects[], hero traits, AE traits, pack, release order, team-ups [[partner, card, pack]]]
+const D = [
+["Spider-Man","Peter Parker",["Justice"],"Avenger","Genius","Core Set",1,[["Silk","Investigative Journalism","Silk"]]],
+["Captain Marvel","Carol Danvers",["Leadership"],"Avenger, Soldier","S.H.I.E.L.D., Soldier","Core Set",1,[]],
+["She-Hulk","Jennifer Walters",["Aggression"],"Avenger, Gamma","Attorney, Gamma","Core Set",1,[]],
+["Iron Man","Tony Stark",["Aggression"],"Avenger","Genius","Core Set",1,[["War Machine","Two Against the World","War Machine"]]],
+["Black Panther","T'Challa",["Protection"],"Avenger, Wakanda","King, Wakanda","Core Set",1,[["Black Panther (Shuri)","Heart of the Panther","Black Panther"]]],
+["Captain America","Steve Rogers",["Leadership"],"Avenger, Soldier","S.H.I.E.L.D., Soldier","Captain America",4,[["Winter Soldier","Super-Soldiers","Winter Soldier"]]],
+["Ms. Marvel","Kamala Khan",["Protection"],"Champion, Inhuman","Inhuman","Ms. Marvel",5,[]],
+["Thor","Odinson",["Aggression"],"Asgard, Avenger","Asgard","Thor",6,[["Hercules","Ancient Rivalry","Hercules"]]],
+["Black Widow","Natasha Romanoff",["Justice"],"Avenger, Spy","S.H.I.E.L.D., Spy","Black Widow",7,[["Winter Soldier","Winter, Widow, Soldier, Spy","Winter Soldier"]]],
+["Doctor Strange","Stephen Strange",["Protection"],"Avenger, Mystic","Mystic","Doctor Strange",8,[]],
+["Hulk","Bruce Banner",["Aggression"],"Avenger, Gamma","Genius, Scientist","Hulk",9,[]],
+["Hawkeye","Clint Barton",["Leadership"],"Avenger","S.H.I.E.L.D.","The Rise of Red Skull",11,[]],
+["Spider-Woman","Jessica Drew",["Aggression","Justice"],"Avenger, Spy","S.H.I.E.L.D., Spy","The Rise of Red Skull",11,[]],
+["Ant-Man","Scott Lang",["Leadership"],"Avenger, Tiny, Giant","Civilian","Ant-Man",13,[["Wasp","Swarm Tactics","Ant-Man"]]],
+["Wasp","Nadia Van Dyne",["Aggression"],"Avenger, Tiny, Giant","Genius","Wasp",14,[["Ant-Man","Swarm Tactics","Ant-Man"]]],
+["Quicksilver","Pietro Maximoff",["Protection"],"Avenger","Civilian","Quicksilver",15,[["Scarlet Witch","Order and Chaos","Quicksilver"]]],
+["Scarlet Witch","Wanda Maximoff",["Justice"],"Avenger, Mystic","Mystic","Scarlet Witch",16,[["Quicksilver","Order and Chaos","Quicksilver"]]],
+["Groot","Groot",["Protection"],"Guardian","Outlaw","Galaxy's Most Wanted",17,[["Rocket Raccoon","Flora and Fauna","Galaxy's Most Wanted"]]],
+["Rocket Raccoon","Rocket Raccoon",["Aggression"],"Guardian","Genius, Outlaw","Galaxy's Most Wanted",17,[["Groot","Flora and Fauna","Galaxy's Most Wanted"]]],
+["Star-Lord","Peter Quill",["Leadership"],"Guardian","Outlaw","Star-Lord",18,[]],
+["Gamora","Gamora",["Aggression"],"Guardian","Outlaw","Gamora",19,[["Nebula","Daughters of Thanos","Nebula"]]],
+["Drax","Drax",["Protection"],"Guardian","Outlaw","Drax",20,[]],
+["Venom","Flash Thompson",["Justice"],"Guardian, Space Knight","Soldier","Venom",21,[]],
+["Spectrum","Monica Rambeau",["Leadership"],"Aerial, Avenger","Civilian","The Mad Titan's Shadow",22,[]],
+["Adam Warlock","Adam Warlock",["All four"],"Guardian, Mystic","Mystic","The Mad Titan's Shadow",22,[]],
+["Nebula","Nebula",["Justice"],"Guardian","Outlaw","Nebula",23,[["Gamora","Daughters of Thanos","Nebula"]]],
+["War Machine","James Rhodes",["Leadership"],"Avenger, Soldier","S.H.I.E.L.D., Soldier","War Machine",24,[["Iron Man","Two Against the World","War Machine"]]],
+["Valkyrie","Brunnhilde",["Aggression"],"Asgard, Avenger","Asgard","Valkyrie",26,[]],
+["Vision","Vision",["Protection"],"Android, Avenger","Android","Vision",27,[]],
+["Ghost-Spider","Gwen Stacy",["Protection"],"Web-Warrior","Civilian","Sinister Motives",28,[["Spider-Man (Miles)","Young Love","Sinister Motives"]]],
+["Spider-Man","Miles Morales",["Justice"],"Champion, Web-Warrior","Civilian","Sinister Motives",28,[["Ghost-Spider","Young Love","Sinister Motives"]]],
+["Nova","Sam Alexander",["Aggression"],"Champion","Civilian","Nova",29,[]],
+["Ironheart","Riri Williams",["Leadership"],"Champion, Aerial","Genius","Ironheart",30,[]],
+["Spider-Ham","Peter Porker",["Justice"],"Cartoon, Web-Warrior","Cartoon, Civilian","Spider-Ham",31,[]],
+["SP//dr","Peni Parker",["Protection"],"Active, Web-Warrior","Civilian","SP//dr",32,[]],
+["Colossus","Piotr Rasputin",["Protection"],"X-Men","Mutant","Mutant Genesis",33,[["Shadowcat","Shadow and Steel","Mutant Genesis"],["Wolverine","Fastball Special","Wolverine"]]],
+["Shadowcat","Kitty Pryde",["Aggression"],"X-Men","Mutant","Mutant Genesis",33,[["Colossus","Shadow and Steel","Mutant Genesis"]]],
+["Cyclops","Scott Summers",["Leadership"],"X-Men","Mutant","Cyclops",34,[["Phoenix","Psychic Rapport","Cyclops"]]],
+["Phoenix","Jean Grey",["Justice"],"Psionic, X-Men","Mutant, Psionic","Phoenix",35,[["Cyclops","Psychic Rapport","Cyclops"],["Storm","Soul Sisters","Phoenix"]]],
+["Wolverine","Logan",["Aggression"],"X-Men","Mutant","Wolverine",36,[["Colossus","Fastball Special","Wolverine"],["Jubilee","Unlikely Duo","Jubilee"]]],
+["Storm","Ororo Munroe",["Leadership"],"X-Men","Mutant","Storm",37,[["Phoenix","Soul Sisters","Phoenix"]]],
+["Gambit","Remy LeBeau",["Justice"],"Thief, X-Men","Mutant, Thief","Gambit",38,[["Rogue","Beauty and the Thief","Gambit"]]],
+["Rogue","Anna Marie",["Protection"],"X-Men","Mutant","Rogue",39,[["Gambit","Beauty and the Thief","Gambit"]]],
+["Cable","Nathan Summers",["Leadership"],"Soldier, X-Force","Mutant, Soldier","NeXt Evolution",41,[["Deadpool","Frenemies","NeXt Evolution"]]],
+["Domino","Neena Thurman",["Justice"],"Posse, X-Force","Mutant","NeXt Evolution",41,[]],
+["Psylocke","Betsy Braddock",["Justice"],"Psionic, X-Force","Mutant, Psionic","Psylocke",42,[["Angel","Soaring Hearts","Angel"]]],
+["Angel","Warren Worthington III",["Protection"],"Aerial, X-Force","Mutant","Angel",43,[["Psylocke","Soaring Hearts","Angel"]]],
+["X-23","Laura Kinney",["Aggression"],"X-Force","Mutant","X-23",44,[]],
+["Deadpool","Wade Wilson",["'Pool"],"Deadpool Corps, X-Force","Mercenary, Mutant","Deadpool",45,[["Cable","Frenemies","NeXt Evolution"]]],
+["Bishop","Lucas Bishop",["Leadership"],"Temporal, X-Men","Mutant, Temporal","Age of Apocalypse",46,[]],
+["Magik","Illyana Rasputin",["Aggression"],"Mystic, X-Men","Mutant, Mystic","Age of Apocalypse",46,[]],
+["Iceman","Bobby Drake",["Aggression"],"Ice, X-Men","Mutant","Iceman",47,[]],
+["Jubilee","Jubilation Lee",["Justice"],"X-Men","Mutant","Jubilee",48,[["Wolverine","Unlikely Duo","Jubilee"]]],
+["Nightcrawler","Kurt Wagner",["Protection"],"X-Men","Mutant","Nightcrawler",49,[]],
+["Magneto","Erik Lehnsherr",["Leadership"],"X-Men","Mutant","Magneto",50,[]],
+["Maria Hill","Maria Hill",["Leadership"],"S.H.I.E.L.D., Spy","S.H.I.E.L.D., Spy","Agents of S.H.I.E.L.D.",51,[["Nick Fury","Super Spies","Agents of S.H.I.E.L.D."]]],
+["Nick Fury","Nick Fury",["Justice"],"S.H.I.E.L.D., Soldier, Spy","S.H.I.E.L.D., Soldier, Spy","Agents of S.H.I.E.L.D.",51,[["Maria Hill","Super Spies","Agents of S.H.I.E.L.D."]]],
+["Black Panther","Shuri",["Justice"],"Wakanda","Genius, Wakanda","Black Panther",52,[["Black Panther (T'Challa)","Heart of the Panther","Black Panther"]]],
+["Silk","Cindy Moon",["Protection"],"Web-Warrior","Genius","Silk",53,[["Spider-Man (Peter)","Investigative Journalism","Silk"]]],
+["Falcon","Sam Wilson",["Leadership"],"Aerial, Avenger","S.H.I.E.L.D.","Falcon",54,[]],
+["Winter Soldier","Bucky Barnes",["Aggression"],"S.H.I.E.L.D., Soldier","S.H.I.E.L.D., Soldier","Winter Soldier",55,[["Captain America","Super-Soldiers","Winter Soldier"],["Black Widow","Winter, Widow, Soldier, Spy","Winter Soldier"]]],
+["Tigra","Greer Nelson",["Aggression"],"Avenger","Police","Civil War",57,[]],
+["Hulkling","Teddy Altman",["Protection"],"Avenger, Kree, Skrull","Kree, Skrull","Civil War",57,[]],
+["Wonder Man","Simon Williams",["Justice"],"Aerial, Avenger","Civilian","Wonder Man",59,[]],
+["Hercules","Hercules",["Leadership"],"Avenger, Olympus","Olympus","Hercules",60,[["Thor","Ancient Rivalry","Hercules"]]],
+["Daredevil","Matt Murdock",["Justice"],"Defender, Martial Artist","Attorney","Fear No Evil",61,[["Elektra","Dance with the Devil","Fear No Evil"],["Echo","See No Evil, Hear No Evil","Fear No Evil"]]],
+["Echo","Maya Lopez",["Protection"],"Defender, Martial Artist","Civilian","Fear No Evil",61,[["Daredevil","See No Evil, Hear No Evil","Fear No Evil"]]],
+["Jessica Jones","Jessica Jones",["Justice"],"Defender","Civilian","Jessica Jones",62,[["Luke Cage","Unbreakable Bond","Jessica Jones"]]],
+["Luke Cage","Luke Cage",["Leadership"],"Defender","Civilian","Luke Cage",63,[["Jessica Jones","Unbreakable Bond","Jessica Jones"],["Iron Fist","Power Man and Iron Fist","Luke Cage"]]],
+["Elektra","Elektra Natchios",["Aggression"],"Defender, Martial Artist","Assassin","Elektra",64,[["Daredevil","Dance with the Devil","Fear No Evil"]]],
+["Iron Fist","Danny Rand",["Protection"],"Defender, K'un-Lun, Martial Artist","Civilian","Iron Fist",64,[["Luke Cage","Power Man and Iron Fist","Luke Cage"]]],
+].map(([name, ae, aspects, ht, at, pack, rel, tu]) => ({
+  name, ae, aspects, pack, rel, tu,
+  ht: ht.split(", "), at: at.split(", "),
+  aspect: aspects.length > 1 ? aspects.join(" + ") : aspects[0],
+}));
+
+const state = { q: "", aspects: new Set(), traits: new Set(), tuOnly: false, sort: "rel", dir: 1 };
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function aspectVar(a) { return `var(${ASPECTS[a]})`; }
+
+// Aspect chips
+const aspectBox = $("#aspects");
+for (const a of ORDER) {
+  const n = D.filter(h => h.aspects.includes(a)).length;
+  const b = document.createElement("button");
+  b.className = "chip"; b.type = "button"; b.setAttribute("aria-pressed", "false");
+  b.style.setProperty("--c", aspectVar(a));
+  b.innerHTML = `<span class="dot"></span>${esc(a)} <span class="n">${n}</span>`;
+  b.onclick = () => { toggle(state.aspects, a); render(); };
+  b.dataset.aspect = a;
+  aspectBox.append(b);
+}
+
+// Trait chips, most common first
+const tcount = {};
+D.forEach(h => h.ht.forEach(t => tcount[t] = (tcount[t] || 0) + 1));
+const traitBox = $("#traits");
+Object.entries(tcount).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).forEach(([t, n]) => {
+  const b = document.createElement("button");
+  b.className = "chip"; b.type = "button"; b.setAttribute("aria-pressed", "false");
+  b.dataset.trait = t;
+  b.innerHTML = `${esc(t)} <span class="n">${n}</span>`;
+  b.onclick = () => { toggle(state.traits, t); render(); };
+  traitBox.append(b);
+});
+
+function toggle(set, v) { set.has(v) ? set.delete(v) : set.add(v); }
+
+$("#q").addEventListener("input", e => { state.q = e.target.value.trim().toLowerCase(); render(); });
+$("#tuOnly").onclick = () => { state.tuOnly = !state.tuOnly; render(); };
+$("#reset").onclick = () => {
+  state.q = ""; $("#q").value = ""; state.aspects.clear(); state.traits.clear(); state.tuOnly = false; render();
+};
+document.querySelectorAll("th").forEach(th => {
+  const go = () => {
+    const k = th.dataset.k;
+    if (state.sort === k) state.dir *= -1; else { state.sort = k; state.dir = 1; }
+    render();
+  };
+  th.onclick = go;
+  th.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+});
+$("#rows").addEventListener("click", e => {
+  const t = e.target.closest(".tag");
+  if (t) { toggle(state.traits, t.dataset.trait); render(); }
+});
+
+function sortKey(h, k) {
+  switch (k) {
+    case "name": return h.name + " " + h.ae;
+    case "aspect": return ORDER.indexOf(h.aspects[0]) * 100 + h.aspects.length;
+    case "ht": return h.ht.join(" ");
+    case "at": return h.at.join(" ");
+    case "tu": return h.tu.length ? h.tu[0][0] : "~";
+    case "rel": return h.rel;
+  }
+}
+
+function render() {
+  const q = state.q;
+  let rows = D.filter(h => {
+    if (state.aspects.size && !h.aspects.some(a => state.aspects.has(a))) return false;
+    if (state.traits.size && ![...state.traits].every(t => h.ht.includes(t))) return false;
+    if (state.tuOnly && !h.tu.length) return false;
+    if (q) {
+      const hay = [h.name, h.ae, h.aspect, h.pack, ...h.ht, ...h.at, ...h.tu.flat()].join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const k = state.sort, d = state.dir;
+  rows.sort((a, b) => {
+    const x = sortKey(a, k), y = sortKey(b, k);
+    const c = typeof x === "number" ? x - y : x.localeCompare(y);
+    return c * d || a.rel - b.rel || a.name.localeCompare(b.name);
+  });
+
+  $("#rows").innerHTML = rows.map(h => {
+    const c = h.aspects.length > 1 ? "var(--multi)" : aspectVar(h.aspects[0]);
+    const asp = h.aspects.map(a => `<span class="asp" style="--c:${aspectVar(a)}"><span class="dot"></span>${esc(a)}</span>`).join("<br>");
+    const tags = arr => arr.map(t => `<button type="button" class="tag${state.traits.has(t) ? " on" : ""}" data-trait="${esc(t)}">${esc(t)}</button>`).join("");
+    const atags = arr => arr.map(t => `<span class="tag" style="cursor:default">${esc(t)}</span>`).join("");
+    const tu = h.tu.length
+      ? h.tu.map(([p, card, pack]) => `<span class="tu"><b>${esc(p)}</b> <i>· ${esc(card)}${pack !== h.pack ? ` (${esc(pack)})` : ""}</i></span>`).join("")
+      : `<span class="none">—</span>`;
+    return `<tr>
+      <td class="hero" style="--c:${c}">${esc(h.name)}<small>${esc(h.ae)}</small></td>
+      <td>${asp}</td>
+      <td>${tags(h.ht)}</td>
+      <td>${atags(h.at)}</td>
+      <td>${tu}</td>
+      <td class="num">${esc(h.pack)}</td>
+    </tr>`;
+  }).join("");
+
+  $("#empty").hidden = rows.length > 0;
+  $("#count").textContent = `Showing ${rows.length} of ${D.length} heroes`;
+  document.querySelectorAll("th").forEach(th => {
+    if (th.dataset.k === state.sort) th.setAttribute("aria-sort", state.dir > 0 ? "ascending" : "descending");
+    else th.removeAttribute("aria-sort");
+  });
+  document.querySelectorAll("[data-aspect]").forEach(b => b.setAttribute("aria-pressed", state.aspects.has(b.dataset.aspect)));
+  document.querySelectorAll("#traits [data-trait]").forEach(b => b.setAttribute("aria-pressed", state.traits.has(b.dataset.trait)));
+  $("#tuOnly").setAttribute("aria-pressed", state.tuOnly);
+}
+render();
+</script>
+</body>
+</html>
