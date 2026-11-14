@@ -109,6 +109,7 @@ footer a { color: var(--accent); }
     <div class="row">
       <span class="label">Team-up</span>
       <button class="chip" id="tuOnly" aria-pressed="false">Has a team-up card</button>
+      <button class="chip" id="tuNone" aria-pressed="false">Has no team-up cards</button>
     </div>
   </section>
 
@@ -342,7 +343,7 @@ function grid() {
   document.getElementById("grid").innerHTML = html;
 }
 
-const state = { q: "", aspects: new Set(), traits: new Set(), tuOnly: false, sort: "rel", dir: 1 };
+const state = { q: "", aspects: new Set(), traits: new Set(), tu: "", sort: "rel", dir: 1 };
 const $ = s => document.querySelector(s);
 const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -377,9 +378,10 @@ Object.entries(tcount).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).f
 function toggle(set, v) { set.has(v) ? set.delete(v) : set.add(v); }
 
 $("#q").addEventListener("input", e => { state.q = e.target.value.trim().toLowerCase(); render(); });
-$("#tuOnly").onclick = () => { state.tuOnly = !state.tuOnly; render(); };
+$("#tuOnly").onclick = () => { state.tu = state.tu === "has" ? "" : "has"; render(); };
+$("#tuNone").onclick = () => { state.tu = state.tu === "none" ? "" : "none"; render(); };
 $("#reset").onclick = () => {
-  state.q = ""; $("#q").value = ""; state.aspects.clear(); state.traits.clear(); state.tuOnly = false; render();
+  state.q = ""; $("#q").value = ""; state.aspects.clear(); state.traits.clear(); state.tu = ""; render();
 };
 document.querySelectorAll("th").forEach(th => {
   const go = () => {
@@ -413,7 +415,8 @@ function render() {
   let rows = D.filter(h => {
     if (state.aspects.size && ![h.count, ...h.show].some(a => state.aspects.has(a))) return false;
     if (state.traits.size && ![...state.traits].every(t => h.ht.includes(t))) return false;
-    if (state.tuOnly && !h.tu.length) return false;
+    if (state.tu === "has" && !h.tu.length) return false;
+    if (state.tu === "none" && h.tu.length) return false;
     if (q) {
       const hay = [h.name, h.ae, h.aspect, h.pack, ...h.ht, ...h.at, ...h.tu.flat()].join(" ").toLowerCase();
       if (!hay.includes(q)) return false;
@@ -457,7 +460,8 @@ function render() {
   });
   document.querySelectorAll("[data-aspect]").forEach(b => b.setAttribute("aria-pressed", state.aspects.has(b.dataset.aspect)));
   document.querySelectorAll("#traits [data-trait]").forEach(b => b.setAttribute("aria-pressed", state.traits.has(b.dataset.trait)));
-  $("#tuOnly").setAttribute("aria-pressed", state.tuOnly);
+  $("#tuOnly").setAttribute("aria-pressed", state.tu === "has");
+  $("#tuNone").setAttribute("aria-pressed", state.tu === "none");
 }
 grid();
 render();
