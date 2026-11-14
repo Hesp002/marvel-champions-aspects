@@ -114,7 +114,7 @@ footer a { color: var(--accent); }
 
   <section class="cover" aria-label="Team coverage">
     <div class="tablebox"><table class="grid" id="grid"></table></div>
-    <p class="note">Counts use hero-side traits. Only three heroes are S.H.I.E.L.D. on the hero side, so one aspect has none. The muted +N shows heroes who are S.H.I.E.L.D. only on their alter-ego side. Miles Morales counts as both Champion and Web-Warrior. Spider-Woman counts toward Protection and Adam Warlock toward Leadership.</p>
+    <p class="note">Counts use hero-side traits. Only three heroes are S.H.I.E.L.D. on the hero side, so one aspect has none. The muted +N shows heroes who are S.H.I.E.L.D. or Soldier only on their alter-ego side. Aerial isn't balanced; its +N shows heroes who can gain Aerial from one of their own cards (hover for the card). Miles Morales counts as both Champion and Web-Warrior. Spider-Woman counts toward Aggression and Adam Warlock toward Leadership.</p>
   </section>
 
   <div class="meta"><span id="count"></span><button id="reset" type="button">Clear filters</button></div>
@@ -241,12 +241,12 @@ const MOVES = {
   "SP//dr|Peni Parker": ["Leadership", "Swapped with Silk by request. Gives Leadership its Web-Warrior."],
   "Spider-Ham|Peter Porker": ["Protection", "Swapped with Silk by request. His 12 hit points and Cartoon Physics damage prevention hold up in Protection."],
   "Silk|Cindy Moon": ["Aggression", "Swapped with SP//dr by request. Gives Aggression its Web-Warrior; her attack cards and Spider Claws suit it, and Peter Parker (Leadership) stays in another aspect."],
-  "War Machine|James Rhodes": ["Aggression", "Swapped with Hawkeye by request. Attack-heavy kit, and Iron Man (Leadership) stays in another aspect."],
+  "War Machine|James Rhodes": ["Justice", "Swapped with Hawkeye by request. Iron Man (Leadership) stays in another aspect, so their team-up still spans two aspects."],
   "Ironheart|Riri Williams": ["Protection", "Swapped with Captain America by request."],
   "Ms. Marvel|Kamala Khan": ["Aggression", "Swapped with Nova by request. Gives Aggression its Champion, and her attack events suit it."],
   "Nova|Sam Alexander": ["Leadership", "Swapped with Ms. Marvel by request. Gives Leadership its Champion."],
   "Spectrum|Monica Rambeau": ["Protection", "Swapped with Ms. Marvel by request. Brings an Avenger to Protection."],
-  "Hawkeye|Clint Barton": ["Justice", "Swapped with War Machine by request."],
+  "Hawkeye|Clint Barton": ["Aggression", "Swapped with War Machine by request. His arrow and attack cards suit Aggression."],
   "Wasp|Nadia Van Dyne": ["Justice", "Swapped with Hawkeye by request. Ant-Man stays in Leadership, so their team-up still spans two aspects."],
   "Bishop|Lucas Bishop": ["Justice", "Swapped with Gambit by request. Both are X-Men, so the team spread is unchanged."],
   "Gambit|Remy LeBeau": ["Aggression", "Swapped with Colossus by request. His own cards are attack-heavy, and Rogue stays in Protection, so their team-up still spans two aspects."],
@@ -285,6 +285,24 @@ D.forEach(h => h.locked = LOCKED.has(h.name + "|" + h.ae));
 const LOCK_ON = `<svg class="on" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" role="img" aria-label="Locked"><title>Locked</title><rect x="3" y="7" width="10" height="7" rx="1.5" fill="currentColor"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>`;
 const LOCK_OFF = `<svg class="off" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" role="img" aria-label="Unlocked"><title>Unlocked</title><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 5.8-1"/></svg>`;
 
+// Signature cards that give a non-Aerial hero the Aerial trait (permanently or for a phase/round).
+const AERIAL_CARDS = {
+  "Captain Marvel|Carol Danvers": "Cosmic Flight",
+  "Iron Man|Tony Stark": "Rocket Boots",
+  "Thor|Odinson": "Mjolnir",
+  "Doctor Strange|Stephen Strange": "Cloak of Levitation",
+  "Wasp|Nadia Van Dyne": "Bio-Synthetic Wings",
+  "Vision|Vision": "Solar Gem",
+  "Nova|Sam Alexander": "Supernova Helmet",
+  "Spider-Ham|Peter Porker": "Organic Webbing",
+  "Iceman|Bobby Drake": "Ice Slide",
+  "Magneto|Erik Lehnsherr": "Magneto's Cape",
+  "Nick Fury|Nick Fury": "Fury's Flying Car",
+  "Silk|Cindy Moon": "Organic Webbing",
+  "Hulkling|Teddy Altman": "Winged Shape",
+  "Daredevil|Matt Murdock": "Daredevil's Billy Club",
+};
+
 const TEAMS = [
   ["Avenger", h => h.ht.includes("Avenger")],
   ["X-Men", h => h.ht.includes("X-Men")],
@@ -296,17 +314,18 @@ const TEAMS = [
   ["Defender", h => h.ht.includes("Defender")],
   ["Soldier", h => h.ht.includes("Soldier"), h => !h.ht.includes("Soldier") && h.at.includes("Soldier")],
   ["Mystic", h => h.ht.includes("Mystic")],
+  ["Aerial", h => h.ht.includes("Aerial"), h => !h.ht.includes("Aerial") && AERIAL_CARDS[h.name + "|" + h.ae], {extra: "Card", free: true}],
 ];
 function grid() {
   const cols = ORDER;
   let html = `<thead><tr><th>Team</th>${cols.map(a => `<th><span class="asp" style="--c:${aspectVar(a)}"><span class="dot"></span>${esc(a)}</span></th>`).join("")}</tr></thead><tbody>`;
   const label = h => h.name === "Black Panther" || h.name === "Spider-Man" ? `${h.name} (${h.ae.split(" ")[0]})` : h.name;
-  for (const [t, f, fae] of TEAMS) {
+  for (const [t, f, fae, opt = {}] of TEAMS) {
     html += `<tr><td>${esc(t)}</td>${cols.map(a => {
       const names = D.filter(h => h.count === a && f(h)).map(label);
-      const extra = fae ? D.filter(h => h.count === a && fae(h)).map(label) : [];
-      const n = names.length, cls = a === "'Pool" ? "" : (n ? "ok" : "bad");
-      const tip = names.join(", ") + (extra.length ? `${names.length ? "; " : ""}alter-ego only: ${extra.join(", ")}` : "");
+      const extra = fae ? D.filter(h => h.count === a && fae(h)).map(h => opt.extra === "Card" ? `${label(h)} – ${AERIAL_CARDS[h.name + "|" + h.ae]}` : label(h)) : [];
+      const n = names.length, cls = a === "'Pool" || opt.free ? "" : (n ? "ok" : "bad");
+      const tip = names.join(", ") + (extra.length ? `${names.length ? "; " : ""}${opt.extra || "alter-ego only"}: ${extra.join(", ")}` : "");
       const ex = extra.length ? ` <span class="ae">+${extra.length}</span>` : "";
       return `<td class="${cls}" title="${esc(tip)}">${n || (a === "'Pool" ? "–" : "0")}${ex}</td>`;
     }).join("")}</tr>`;
